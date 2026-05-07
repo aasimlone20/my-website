@@ -1,0 +1,31 @@
+name: Daily Review Update
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs at midnight daily
+  workflow_dispatch: # Allows manual "Run" button
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: pip install pandas requests jinja2
+
+      - name: Run Bot
+        env:
+          RAPID_API_KEY: ${{ secrets.RAPID_API_KEY }}
+        run: python review_bot.py
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./ # Serves the generated index.html
